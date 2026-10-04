@@ -1,0 +1,6 @@
+import{t}from'./i18n.mjs';
+export let session=null;
+export function setSession(value){session=value;}
+export async function api(path,options={}){const method=options.method||'GET',headers={...options.headers};if(method!=='GET'&&method!=='HEAD'){if(session?.csrf_token)headers['X-CSRF-Token']=session.csrf_token;if(options.body!==undefined)headers['Content-Type']='application/json';if(options.key)headers['Idempotency-Key']=options.key;if(options.revision)headers['If-Match']=`"r${options.revision}"`;}const response=await fetch('/api/v1/'+path,{...options,method,headers,body:options.body===undefined?undefined:JSON.stringify(options.body),credentials:'same-origin',cache:'no-store'});const body=response.status===204?null:await response.json();if(!response.ok){const e=new Error(t(body?.error?.message||'Permintaan gagal.'));Object.assign(e,{code:body?.error?.code,field:body?.error?.field,status:response.status});if(e.status===401&&!path.startsWith('session'))location.assign('/login');throw e;}return body;}
+export const key=()=>crypto.randomUUID();
+export async function all(path){const items=[];let cursor=null;do{const result=await api(path+(path.includes('?')?'&':'?')+'limit=200'+(cursor?'&cursor='+encodeURIComponent(cursor):''));items.push(...result.items);cursor=result.next_cursor;}while(cursor);return items;}

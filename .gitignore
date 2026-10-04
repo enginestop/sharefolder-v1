@@ -1,0 +1,15 @@
+# Build outputs and local state
+/sharefolder
+/dist/
+/.local/
+/test-results/
+/node_modules/
+/config/
+/state/
+/data/
+*.db
+*.db-shm
+*.db-wal
+*.key
+*.env
+*.log
